@@ -353,11 +353,11 @@ fi
 # ------------------------- Setting up variables ------------------------
 
 if [ -n "${DRY_RUN}" ]; then
-  STATIC_OPTIONS="${DRY_RUN} ${STATIC_OPTIONS}"
+  STATIC_SSH_OPTIONS="${DRY_RUN} ${STATIC_SSH_OPTIONS}"
 fi
 
 if [ -n "${STORAGECLASS}" ]; then
-  STATIC_OPTIONS="${STATIC_OPTIONS} ${STORAGECLASS}"
+  STATIC_SSH_OPTIONS="${STATIC_SSH_OPTIONS} ${STORAGECLASS}"
 fi
 
 SIGN_PASSPHRASE=${PASSPHRASE}
@@ -694,7 +694,7 @@ get_remote_file_size()
 
       TMPDEST="${DEST#*://*/}"
       TMPDEST="${DEST%/${TMPDEST}}"
-      ssh_opt=$(echo "${STATIC_OPTIONS}" |awk -vo="--ssh-options=" '{s=index($0,o); if (s) {s=substr($0,s+length(o)); m=substr(s,0,1); for (i=2; i < length(s); i++) { if (substr(s,i,1) == m && substr(s,i-1,1) != "\\\\") break; } print substr(s,2,i-2)}}')
+      ssh_opt=$(echo "${STATIC_SSH_OPTIONS}" |awk -vo="--ssh-options=" '{s=index($0,o); if (s) {s=substr($0,s+length(o)); m=substr(s,0,1); for (i=2; i < length(s); i++) { if (substr(s,i,1) == m && substr(s,i-1,1) != "\\\\") break; } print substr(s,2,i-2)}}')
 
       SIZE=$(${TMPDEST%://*} "${ssh_opt}" "${TMPDEST#*//}" du -hs "${DEST#${TMPDEST}/}" | awk '{print $1}')
       EMAIL_SUBJECT="${EMAIL_SUBJECT} ${SIZE} $(${TMPDEST%://*} "${ssh_opt}" "${TMPDEST#*//}" df -hP "${DEST#${TMPDEST}/}" | awk '{tmp=$5 " used"}END{print tmp}')"
@@ -828,7 +828,7 @@ duplicity_cleanup()
   echo "----------------[ Duplicity Cleanup ]----------------"
   if [[ "${CLEAN_UP_TYPE}" != "none" && -n ${CLEAN_UP_TYPE} && -n ${CLEAN_UP_VARIABLE} ]]; then
     {
-      eval "${ECHO}" "${DUPLICITY}" "${CLEAN_UP_TYPE}" "${CLEAN_UP_VARIABLE}" "${STATIC_OPTIONS}" --force \
+      eval "${ECHO}" "${DUPLICITY}" "${CLEAN_UP_TYPE}" "${CLEAN_UP_VARIABLE}" "${STATIC_SSH_OPTIONS}" --force \
         "${ENCRYPT}" \
         "${DEST}"
     } || {
@@ -839,7 +839,7 @@ duplicity_cleanup()
   if [ -n "${REMOVE_INCREMENTALS_OLDER_THAN}" ] && [[ ${REMOVE_INCREMENTALS_OLDER_THAN} =~ ^[0-9]+$ ]]; then
     {
       eval "${ECHO}" "${DUPLICITY}" remove-all-inc-of-but-n-full "${REMOVE_INCREMENTALS_OLDER_THAN}" \
-        "${STATIC_OPTIONS}" --force \
+        "${STATIC_SSH_OPTIONS}" --force \
         "${ENCRYPT}" \
         "${DEST}"
     } || {
@@ -852,7 +852,7 @@ duplicity_cleanup()
 duplicity_backup()
 {
   {
-    eval "${ECHO}" "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_OPTIONS}" \
+    eval "${ECHO}" "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_SSH_OPTIONS}" \
     "${ENCRYPT}" \
     "${EXCLUDE}" \
     "${INCLUDE}" \
@@ -866,7 +866,7 @@ duplicity_backup()
 duplicity_cleanup_failed()
 {
   {
-    eval "${ECHO}" "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_OPTIONS}" \
+    eval "${ECHO}" "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_SSH_OPTIONS}" \
     "${ENCRYPT}" \
     "${DEST}"
   } || {
@@ -1032,7 +1032,7 @@ case "${COMMAND}" in
     OPTION="cleanup ${OPTION}"
 
     if [ -z "${DRY_RUN}" ]; then
-      STATIC_OPTIONS="${STATIC_OPTIONS} --force"
+      STATIC_SSH_OPTIONS="${STATIC_SSH_OPTIONS} --force"
     fi
 
     echo -e "-------[ Cleaning up Destination ]-------\n"
@@ -1046,7 +1046,7 @@ case "${COMMAND}" in
     ROOT=${DEST}
     OPTION="restore ${OPTION}"
     if [ -n "${TIME}" ]; then
-      STATIC_OPTIONS="${STATIC_OPTIONS} --time ${TIME}"
+      STATIC_SSH_OPTIONS="${STATIC_SSH_OPTIONS} --time ${TIME}"
     fi
 
     if [[ ! "${RESTORE_DEST}" ]]; then
@@ -1076,7 +1076,7 @@ case "${COMMAND}" in
     OPTION="restore ${OPTION}"
 
     if [ -n "${TIME}" ]; then
-      STATIC_OPTIONS="${STATIC_OPTIONS} --time ${TIME}"
+      STATIC_SSH_OPTIONS="${STATIC_SSH_OPTIONS} --time ${TIME}"
     fi
 
     if [[ ! "${FILE_TO_RESTORE}" ]]; then
@@ -1118,11 +1118,11 @@ case "${COMMAND}" in
     OPTION="list-current-files ${OPTION}"
 
     if [ -n "${TIME}" ]; then
-      STATIC_OPTIONS="${STATIC_OPTIONS} --time ${TIME}"
+      STATIC_SSH_OPTIONS="${STATIC_SSH_OPTIONS} --time ${TIME}"
     fi
 
     eval \
-    "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_OPTIONS}" \
+    "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_SSH_OPTIONS}" \
     ${ENCRYPT} \
     "${DEST}"
   ;;
@@ -1131,7 +1131,7 @@ case "${COMMAND}" in
     OPTION="collection-status ${OPTION}"
 
     eval \
-    "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_OPTIONS}" \
+    "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_SSH_OPTIONS}" \
     ${ENCRYPT} \
     "${DEST}"
   ;;
