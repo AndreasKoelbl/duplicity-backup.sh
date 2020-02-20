@@ -19,14 +19,15 @@
 #
 # MORE ABOUT THIS SCRIPT AVAILABLE IN THE README AND AT:
 #
-# http://zertrin.org/projects/duplicity-backup/ (for this version)
+# http://github.com/AndreasKoelbl/duplicity-backup.sh  (for this version)
+# http://zertrin.org/projects/duplicity-backup/ (for the first unmaintained fork without -d switch
 # http://damontimm.com/code/dt-s3-backup (for the original program by Damon Timm)
 #
 # Latest code available at:
-# http://github.com/zertrin/duplicity-backup.sh
+# http://github.com/AndreasKoelbl/duplicity-backup.sh
 #
 # List of contributors:
-# https://github.com/zertrin/duplicity-backup.sh/graphs/contributors
+# https://github.com/AndreasKoelbl/duplicity-backup.sh/graphs/contributors
 #
 # ---------------------------------------------------------------------------- #
 
