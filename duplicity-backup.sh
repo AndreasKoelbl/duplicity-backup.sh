@@ -83,6 +83,10 @@ echo "USAGE:
     --backup-script            automatically backup the script and secret key(s) to
                                the current working directory
 
+    -p, --param                pass parameters directly to duplicity
+                               use at your own risk
+                               allowed charset is [a-z-]
+
     -q, --quiet                silence most of output messages, except errors and output
                                that are intended for interactive usage. Silenced output
                                is still logged in the logfile.
@@ -143,7 +147,7 @@ version(){
 # Some expensive argument parsing that allows the script to
 # be insensitive to the order of appearance of the options
 # and to handle correctly option parameters that are optional
-while getopts ":c:t:bfvelsqndhV-:" opt; do
+while getopts ":p:c:t:bfvelsqndhV-:" opt; do
   case $opt in
     # parse long options (a bit tricky because builtin getopts does not
     # manage long options and I don't want to impose GNU getopt dependancy)
@@ -235,6 +239,10 @@ while getopts ":c:t:bfvelsqndhV-:" opt; do
       echo "Invalid option: -${OPTARG}" >&2
       COMMAND=""
     ;;
+    p|param)
+      OPTION="${OPTION} ${OPTARG}"
+	exit 95
+      fi
   esac
 done
 #echo "Options parsed. COMMAND=${COMMAND}" # for debugging
@@ -991,7 +999,7 @@ case "${COMMAND}" in
   ;;
 
   "full")
-    OPTION="full"
+    OPTION="full ${OPTION}"
     include_exclude
     duplicity_backup
     duplicity_cleanup
@@ -1002,7 +1010,7 @@ case "${COMMAND}" in
     OLDROOT=${ROOT}
     ROOT=${DEST}
     DEST=${OLDROOT}
-    OPTION="verify"
+    OPTION="verify ${OPTION}"
 
     echo -e "-------[ Verifying Source & Destination ]-------\n"
     include_exclude
@@ -1021,7 +1029,7 @@ case "${COMMAND}" in
   ;;
 
   "cleanup")
-    OPTION="cleanup"
+    OPTION="cleanup ${OPTION}"
 
     if [ -z "${DRY_RUN}" ]; then
       STATIC_OPTIONS="${STATIC_OPTIONS} --force"
@@ -1036,7 +1044,7 @@ case "${COMMAND}" in
 
   "restore")
     ROOT=${DEST}
-    OPTION="restore"
+    OPTION="restore ${OPTION}"
     if [ -n "${TIME}" ]; then
       STATIC_OPTIONS="${STATIC_OPTIONS} --time ${TIME}"
     fi
@@ -1065,7 +1073,7 @@ case "${COMMAND}" in
 
   "restore-file"|"restore-dir")
     ROOT=${DEST}
-    OPTION="restore"
+    OPTION="restore ${OPTION}"
 
     if [ -n "${TIME}" ]; then
       STATIC_OPTIONS="${STATIC_OPTIONS} --time ${TIME}"
@@ -1107,7 +1115,7 @@ case "${COMMAND}" in
   ;;
 
   "list-current-files")
-    OPTION="list-current-files"
+    OPTION="list-current-files ${OPTION}"
 
     if [ -n "${TIME}" ]; then
       STATIC_OPTIONS="${STATIC_OPTIONS} --time ${TIME}"
@@ -1120,7 +1128,7 @@ case "${COMMAND}" in
   ;;
 
   "collection-status")
-    OPTION="collection-status"
+    OPTION="collection-status ${OPTION}"
 
     eval \
     "${DUPLICITY}" "${OPTION}" "${VERBOSITY}" "${STATIC_OPTIONS}" \
